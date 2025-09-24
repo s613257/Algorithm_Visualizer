@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演算法劇場</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- 引入 Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 引入 dataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.css">
+    <!-- 引入 sweetalert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.2/dist/sweetalert2.min.css">
+</head>
+<body>
+    <div class="main-container">
+
+        <nav class="sidebar">
+            <header>
+                <h1>演算法劇場</h1>
+                <div class="sidebar-icon">
+                    <i id="notebook-icon" class="fa-solid fa-book"></i>
+                </div>
+            </header>
+            <button class="nav-btn active" data-page="sort">排序</button>
+            <div class="collapsible-group">
+                <button class="nav-btn toggle-btn" data-page="search">搜尋</button>
+                <div class="collapsible-content">
+                    <button id="show-bfs-btn" class="sub-nav-btn">廣度優先搜尋法 (BFS)</button>
+                    <button id="show-dfs-btn" class="sub-nav-btn">深度優先搜尋法 (DFS)</button>
+                </div>
+            </div>
+            <button class="nav-btn" data-page="clustering">分類與分群</button>
+        </nav>
+
+        <main class="content-area">
+            
+            <div id="sort-page" class="page-content active">
+                <div class="number-input-group">
+                    <p>請輸入 10 個數字 (0-100)：</p>
+                    <div class="inputs-grid">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                        <input type="number" class="num-input"  min="0" max="100">
+                    </div>
+                    <button id="randomizeBtn">隨機產生</button>
+                </div>
+
+                <div class="algorithm-buttons">
+                    <button class="algo-btn" data-algo="bubble">氣泡排序</button>
+                    <button class="algo-btn" data-algo="insertion">插入排序</button>
+                    <button class="algo-btn" data-algo="selection">選擇排序</button>
+                    <button class="algo-btn" data-algo="quick">快速排序</button>
+                    <button class="algo-btn" data-algo="merge">合併排序</button>
+                    <button class="algo-btn" data-algo="heap">堆積排序</button>
+                </div>
+
+                <div class="visualization-area">
+                    <div id="completionMessage" class="completion-message"></div>
+
+                    <div id="barsContainer" class="bars-container">
+                </div>
+                    <div class="controls">
+                        <button id="playBtn"  disabled>播放</button>
+                        <button id="pauseBtn" disabled>暫停</button>
+                        <button id="resetBtn" disabled>重設</button>
+                        <input type="range" id="speedSlider" min="500" max="5000" value="3500">
+                        <span>速度</span>
+                    </div>
+                </div>
+
+                <div id="result" class="result-info"></div>
+            </div>
+
+            <div id="search-page" class="page-content">
+                <div id="bfs-page" class="page-content">
+                    <div class="search-header">
+                        <h2>廣度優先搜尋 (BFS) 迷宮</h2>
+                        <p class="maze-info-text" data-maze-type="numbers">跟著小動物，從數字 1 走到數字 10，找到食物吧！</p>
+                    </div>
+
+                    
+                    <div class="maze-and-legend-wrapper">
+                        <div class="maze-container"></div>
+                    </div>
+                    <div class="color-legend">
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #a53cce;"></span>
+                            <span class="legend-text">紫色：撞牆</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #ffd700;"></span>
+                            <span class="legend-text">黃色：可往前探索</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #3cb371;"></span>
+                            <span class="legend-text">綠色：最終路線</span>
+                        </div>
+                    </div>
+
+                    <div class="search-controls">
+                        <button class="maze-type-btn" data-maze-type="numbers">數字迷宮</button>
+                        <button class="maze-type-btn" data-maze-type="wall">牆壁迷宮</button>
+                        <button id="startSearchBtn">開始尋找</button>
+                        <button id="resetSearchBtn">換圖</button>
+                        <div class="search-speed">
+                            <span>動畫速度：</span>
+                            <input type="range" id="searchSpeedSlider" min="500" max="5000" value="3500">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dfs-page" class="page-content" style="display: none;">
+                    <div class="search-header">
+                        <h2>深度優先搜尋 (DFS) 迷宮</h2>
+                        <p class="maze-info-text" data-maze-type="wall">坐上交通工具，抵達終點吧！</p>
+                    </div>
+                    
+                    <div class="maze-and-legend-wrapper">
+                        <div class="maze-container"></div>
+                    </div>
+                    <div class="color-legend">
+                       <div class="legend-item">
+                            <span class="legend-box" style="background-color: #a53cce;"></span>
+                            <span class="legend-text">紫色：撞牆</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #ffd700;"></span>
+                            <span class="legend-text">黃色：可往前探索</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #ff6347;"></span>
+                            <span class="legend-text">紅色：死路</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-box" style="background-color: #3cb371;"></span>
+                            <span class="legend-text">綠色：最終路線</span>
+                        </div>
+                    </div>
+                    
+                    <div class="search-controls">
+                        <button class="maze-type-btn" data-maze-type="numbers">數字迷宮</button>
+                        <button class="maze-type-btn" data-maze-type="wall">牆壁迷宮</button>
+                        <button id="startDfsBtn">開始尋找</button>
+                        <button id="resetDfsBtn">換圖</button>
+                        <div class="search-speed">
+                            <span>動畫速度：</span>
+                            <input type="range" id="dfsSpeedSlider" min="500" max="5000" value="3500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clustering-page" class="page-content">
+                <div class="clustering-container">
+                    <div class="top-row">
+                        <div class="left-side">
+                            <div class="file-drop-area">
+                                <p>Drop and Draw 拖放檔案</p>
+                            </div>
+                            <div class="control-area">
+                                <div class="clustering-buttons">
+                                    <button class="classification-btn">分類</button>
+                                    <button class="clustering-btn">分群</button>
+                                </div>
+
+                                <div id="classification-settings" class="mode-settings">
+                                    <label for="target-field">目標欄位名稱:</label>
+                                    <input type="text" id="target-field" value="target_class">
+                                </div>
+
+                                <div id="clustering-settings" class="mode-settings">
+                                    <label for="cluster-count">集群數量:</label>
+                                    <input type="number" id="cluster-count" value="3" min="2">
+                                </div>
+
+                                <button class="execute-btn">執行分析按鈕</button>
+                            </div>
+                        </div>
+                        <div class="right-side">
+                            <div class="analysis-results">
+                            <!-- <p>分析結果顯示區</p> -->
+                            <!-- 新增 Chart.js 的畫布 -->
+                                <div id="results-chart-container" style="width: 600px; height: 300px; margin: 0 auto;"> 
+                                    <canvas id="myChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="accuracy-info"></div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-row">
+                        <div class="data-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ===================================================
+    ---------------- 筆記本功能樣式 ----------------
+    =================================================== -->
+    <div id="sort-note" style="display: none;">
+        <div class="note-navbar">
+            <button class="nav-button active" data-target="bubble-sort">氣泡</button>
+            <button class="nav-button" data-target="insertion-sort">插入</button>
+            <button class="nav-button" data-target="selection-sort">選擇</button>
+            <button class="nav-button" data-target="quick-sort">快速</button>
+            <button class="nav-button" data-target="merge-sort">合併</button>
+            <button class="nav-button" data-target="heap-sort">堆積</button>
+        </div>
+        <div class="note-container">
+            <div class="note-text-area">
+                <div id="bubble-sort" class="note-section active">
+                    <h3>氣泡排序(Bubble Sort)</h3>
+                    <p>從第一個元素開始比較，相鄰交換</p>
+                    <img src="{{ url_for('static', filename='pngHome/氣泡排序程式碼.png') }}" alt="氣泡排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div id="insertion-sort" class="note-section" style="display: none;">
+                    <h3>插入排序(Insertion Sort)</h3>
+                    <p>從第一個元素開始(已排序子序列)的末尾開始往前比較</p>
+                    <p>為保持穩定性，新元素與已排序子序列中的某個元素鍵值相等，應將新元素插入在其右側，從而維持原有相等元素的相對順序</p>
+                    <img src="{{ url_for('static', filename='pngHome/插入排序程式碼.png') }}" alt="插入排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div id="selection-sort" class="note-section" style="display: none;">
+                    <h3>選擇排序(Selection Sort)</h3>
+                    <p>從第一個元素開始與全部數值中的最小值做比較，若大小相反則交換</p>
+                    <img src="{{ url_for('static', filename='pngHome/選擇排序程式碼.png') }}" alt="選擇排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div id="quick-sort" class="note-section" style="display: none;">
+                    <h3>快速排序(Quick Sort)</h3>
+                    <p>從數列中挑選一個基準(pivot)，比基準小的放左邊，比基準大的放右邊</p>
+                    <p>對左右的子序列做遞迴重複步驟，直到子序列數量剩0或1個元素</p>
+                    <img src="{{ url_for('static', filename='pngHome/快速排序程式碼.png') }}" alt="快速排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div id="merge-sort" class="note-section" style="display: none;">
+                    <h3>合併排序(Merge Sort)</h3>
+                    <p>分割與合併 (Divide and Conquer)</p>
+                    <img src="{{ url_for('static', filename='pngHome/合併排序程式碼.png') }}" alt="合併排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+
+                <div id="heap-sort" class="note-section" style="display: none;">
+                    <h3>堆積排序(Heap Sort)</h3>
+                    <p>二元堆積樹(binary heap tree)，核心步驟如下說明 : (以最大堆積為例)</p>
+                    <p>(一)建置堆積 : 分為最大堆積(max heap) / 最小堆積(min heap)</p>
+                    <p>堆積化(Heapify)操作 : 將節點和它的子節點進行比較與交換。</p>
+                    <p>(二)排序階段(Sorting Phase) : 不斷取出堆積中的最大值（根節點）放到陣列的尾部，將已排序的最大值從堆積中「移除」，並將剩下的元素重新堆積化，直到所有元素都排序完成</p>
+                    <img src="{{ url_for('static', filename='pngHome/堆積排序程式碼.png') }}" alt="堆積排序程式碼" style="max-width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <div class="note-image-area">
+                <div id="bubble-sort-image" class="image-section active">
+                    <img src="{{ url_for('static', filename='pngHome/氣泡排序流程圖.png') }}" alt="氣泡排序流程圖" style="max-width: 100%; height: auto;">
+                </div>
+                <div id="insertion-sort-image" class="image-section" style="display: none;">
+                    <img src="{{ url_for('static', filename='pngHome/插入排序流程圖.png') }}" alt="插入排序流程圖" style="max-width: 100%; height: auto;">
+                </div>
+                <div id="selection-sort-image" class="image-section" style="display: none;">
+                    <img src="{{ url_for('static', filename='pngHome/選擇排序流程圖.png') }}" alt="選擇排序流程圖" style="max-width: 100%; height: auto;">
+                </div>
+                <div id="quick-sort-image" class="image-section" style="display: none;">
+                    <img src="{{ url_for('static', filename='pngHome/快速排序流程圖.png') }}" alt="快速排序流程圖" style="max-width: 100%; height: auto;">
+                </div>
+                <div id="merge-sort-image" class="image-section" style="display: none;">
+                    <img src="{{ url_for('static', filename='pngHome/合併排序流程圖.png') }}" alt="合併排序流程圖" style="max-width: 100%; height: auto;">
+                </div>
+                <div id="heap-sort-image" class="image-section" style="display: none;">
+                    <img src="{{ url_for('static', filename='pngHome/heapTree.png') }}" alt="堆積樹" style="max-width: 100%; height: auto;">
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <video autoplay muted loop poster="{{ url_for('static', filename='pngHome/poster_image.jpg') }}">
+                        <source src="{{ url_for('static', filename='pngHome/堆積排序流程.mp4') }}" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="search-note" style="display: none;">
+        <div class="note-content">
+            <div class="book-page left-page">
+                <h3>廣度優先搜尋法 Breadth-first Search (BFS)</h3>
+                <p>一層一層地拜訪節點，從離起點最近的節點開始，然後再探索更遠的節點</p>
+                <p>若路徑存在，則會找出最短路徑</p>
+                <img src="{{ url_for('static', filename='pngHome/BFS_tree.png') }}" alt="廣度樹" style="max-width: 100%; height: auto;">
+                <img src="{{ url_for('static', filename='pngHome/BFS_graphn.png') }}" alt="廣度無向圖" style="max-width: 100%; height: auto;">
+                <img src="{{ url_for('static', filename='pngHome/BFS_graph.png') }}" alt="廣度有向圖" style="max-width: 100%; height: auto;">
+                <p>核心運作方式就是利用佇列(Queue)，只要有新的、還沒被拜訪過的節點被發現時，它就會被「暫存」到佇列中，等待被處理，需將已搜尋的標註起來，才不會陷入無窮迴圈</p>
+                <img src="{{ url_for('static', filename='pngHome/BFS.png') }}" alt="廣度程式碼" style="max-width: 100%; height: auto;">
+            </div>
+            <div class="book-page right-page">
+                <h3>深度優先搜尋法 Depth-first Search (DFS)</h3>
+                <p>一條路走到黑，直到無路可走才回頭 (回溯) 尋找其他路徑</p>
+                <p>是能套用在圖形/樹狀圖的走訪演算法，但不能尋找最短路徑</p>
+                 <img src="{{ url_for('static', filename='pngHome/DFS_tree.png') }}" alt="深度樹" style="max-width: 100%; height: auto;">
+                <img src="{{ url_for('static', filename='pngHome/DFS_graphn.png') }}" alt="深度無向圖" style="max-width: 100%; height: auto;">
+                <img src="{{ url_for('static', filename='pngHome/DFS_graph.png') }}" alt="深度有向圖" style="max-width: 100%; height: auto;">
+                <p>可以使用堆疊(Stack)來實現，但更常使用遞迴來實現</p>
+                <img src="{{ url_for('static', filename='pngHome/DFS.png') }}" alt="深度程式碼" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
+
+    <div id="MachineLearning-note" style="display: none;">
+        <div class="note-content">
+            <div class="book-page left-page">
+                <h3>分類(Classification)</h3>
+                <p>屬於監督式學習，需要有已標註的數據作為訓練。</p>
+                <!-- <h4>分類演算法：</h4> -->
+                <ul>
+                    <li>
+                        <strong>KNN(K最近鄰居法)</strong> : 利用樣本點間的距離，找到k最近的鄰居。
+                        <img src="{{ url_for('static', filename='pngHome/分類K鄰居.png') }}" alt="分類K鄰居" style="max-width: 100%; height: auto;">
+                    </li>
+                    <li>
+                        <strong>決策樹 (Decision Tree)</strong>：每層都根據特定特徵對數據進行分割，並套用 if-else 結構來預測結果。
+                        <img src="{{ url_for('static', filename='pngHome/分類決策樹.png') }}" alt="分類決策樹" style="max-width: 100%; height: auto;">
+                    </li>
+                </ul>
+            </div>
+            <div class="book-page right-page">
+                <h3>分群(Clustering)</h3>
+                <p>屬於非監督式學習，用於尋找未標註數據中的內在結構。</p>
+                <p>透過特徵(features)做區分，群內數據相似度較高，群外數據相似度較低。</p>
+                <!-- <h4>分群演算法：</h4> -->
+                <ul>
+                    <li>
+                        <strong>K-means分群</strong> : 透過計算資料間的距離作為分群依據的演算法。
+                        <img src="{{ url_for('static', filename='pngHome/分群Kmeans.png') }}" alt="分群Kmeans" style="max-width: 100%; height: auto;">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- 引入 Chart.js 和它的日期工具 Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.2/dist/sweetalert2.all.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
